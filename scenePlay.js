@@ -139,12 +139,20 @@ var scenePlay = new Phaser.Class({
                 this.platforms.create(900 + relativeSize.w, 480, 'ground');
                 this.platforms.create(600 + relativeSize.w, 584, 'ground');
             } else {
-                this.platforms.create(80 + relativeSize.w, 230, 'ground');
-                this.platforms.create(400 + relativeSize.w, 230, 'ground');
-                this.platforms.create(102 + relativeSize.w, 400, 'ground');
-                this.platforms.create(200 + relativeSize.w, 524, 'ground');
-                this.platforms.create(350 + relativeSize.w, 424, 'ground');
-                this.platforms.create(600 + relativeSize.w, 584, 'ground');
+                // Platform utama bawah
+    this.platforms.create(80 + relativeSize.w, 600, 'ground');
+    this.platforms.create(350 + relativeSize.w, 600, 'ground');
+    this.platforms.create(600 + relativeSize.w, 600, 'ground');
+    this.platforms.create(900 + relativeSize.w, 600, 'ground');
+
+    // Platform tengah
+    this.platforms.create(200 + relativeSize.w, 400, 'ground');
+    this.platforms.create(600 + relativeSize.w, 400, 'ground');
+
+    // Platform atas
+    this.platforms.create(450 + relativeSize.w, 250, 'ground');
+    this.platforms.create(800 + relativeSize.w, 200, 'ground');
+
             }
 
             for (let i = 0; i < 10; i++) {
@@ -272,5 +280,84 @@ var scenePlay = new Phaser.Class({
             this.player.setVelocityY(-650);
             this.sound.play('snd_jump');
         }
+    }
+});
+var sceneGameOver = new Phaser.Class({
+    Extends: Phaser.Scene,
+
+    initialize: function () {
+        Phaser.Scene.call(this, { key: 'sceneGameOver' });
+    },
+
+    create: function () {
+        const centerX = this.sys.game.config.width / 2;
+        const centerY = this.sys.game.config.height / 2;
+
+        // Buat overlay semi-transparan dengan Phaser
+        const overlay = this.add.rectangle(centerX, centerY, this.sys.game.config.width, this.sys.game.config.height, 0x000000, 0.5)
+            .setDepth(0)
+            .setAlpha(0);
+
+        this.tweens.add({
+            targets: overlay,
+            alpha: 0.6,
+            duration: 500,
+            ease: 'Power2'
+        });
+
+        // Animasi gambar Game Over
+        const gameOverImage = this.add.image(centerX, centerY - 150, 'gameover')
+            .setOrigin(0.5)
+            .setScale(0);
+
+        this.tweens.add({
+            targets: gameOverImage,
+            scale: 1,
+            duration: 600,
+            ease: 'Back.Out'
+        });
+
+        // Ambil coins terakhir dari localStorage
+        const lastCoins = localStorage.getItem("lastCoins") || 0;
+
+        // Tampilkan coin terakhir dengan animasi fade in
+        const coinText = this.add.text(centerX, centerY - 20, `Coins Collected: ${lastCoins}`, {
+            fontSize: '40px',
+            color: '#000',
+            fontFamily: 'Verdana',
+            strokeThickness: 4
+        }).setOrigin(0.5).setAlpha(0);
+
+        this.tweens.add({
+            targets: coinText,
+            alpha: 1,
+            duration: 800,
+            delay: 400,
+            ease: 'Power2'
+        });
+
+        // Tambahkan tombol retry
+        const retryButton = this.add.text(centerX, centerY + 80, "Retry", {
+            fontSize: '34px',
+            color: '#000',
+            backgroundColor: '#ff4444',
+            padding: { x: 20, y: 10 },
+            fontFamily: 'Verdana'
+        }).setOrigin(0.5).setInteractive();
+
+        // Animasi tombol
+        this.tweens.add({
+            targets: retryButton,
+            scale: { from: 1, to: 1.1 },
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+            duration: 500
+        });
+
+        // Klik tombol untuk restart
+        retryButton.on('pointerdown', () => {
+            this.scene.start('scenePlay');
+        });
     }
 });
